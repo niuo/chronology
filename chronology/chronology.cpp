@@ -2,7 +2,7 @@
 #include "chronology.h"
 
 
-BAKKESMOD_PLUGIN(chronology, "Dsiplay the timeline of each goal during a game", plugin_version, PLUGINTYPE_FREEPLAY)
+BAKKESMOD_PLUGIN(chronology, "Dsiplay an event timeline of the game", plugin_version, PLUGINTYPE_FREEPLAY)
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 bool chronologyEnabled = true;
@@ -30,10 +30,6 @@ void chronology::onLoad() {
 		[this](ServerWrapper caller, void* params, std::string eventname) {
 			onStatTickerMessage(params);
 		});
-	
-	//DEBUG - go freeplay
-	//blueGoals.push_back(5);
-	//orangeGoals.push_back(233);
 }
 
 
@@ -63,7 +59,6 @@ void chronology::Render(CanvasWrapper canvas) {
 
 	//all events
 	for (auto [a, b, c, d] : events) { //time, event, team, player
-		LOG("[TICKER] time:{}, name:{}, team:{}, player:{}", a, b, c, d);
 		float xPos = imgGroundWidth * (globalTime - a) / globalTime;
 		//background time
 		if (c == 0) canvas.SetColor(LinearColor(100, 100, 255, 100));
@@ -85,8 +80,6 @@ void chronology::Render(CanvasWrapper canvas) {
 		canvas.SetPosition(Vector2F{ xOffset - (d.length()*2) + xPos , yOffset - 40});
 		canvas.DrawString(d, 1, 1, true, false);
 	}
-
-
 
 }
 
@@ -117,10 +110,6 @@ void chronology::onStatTickerMessage(void* params) {
 	if (!sw) { return; }
 	if (sw.GetbOverTime()) { return; }
 	currentTime = sw.GetSecondsRemaining();
-
-	// reverse timer
-	//if (sw.GetSecondsRemaining() == 300) time = 0;
-	//else if (300 - sw.GetSecondsRemaining() > time) time = 300 - sw.GetSecondsRemaining();
 
 	if (statEvent.GetEventName() == "EpicSave") {
 		if (!receiver) { LOG("Null reciever PRI"); return; }
