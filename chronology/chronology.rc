@@ -1,7 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
-#include "version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -14,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -45,12 +44,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (United States) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Norwegian Bokmål (Norway) resources
+// Bokmål norvégien (Norvège) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NOR)
 LANGUAGE LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL
@@ -62,8 +61,8 @@ LANGUAGE LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL
 //
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_BUILD
-PRODUCTVERSION VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_BUILD
+ FILEVERSION 1,0,0,286
+ PRODUCTVERSION 1,0,0,286
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -76,25 +75,25 @@ PRODUCTVERSION VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_BUILD
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "041404b0"
+        BLOCK "040c04b0"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
-            VALUE "FileVersion", stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD)
-            VALUE "InternalName", "BakkesPluginTemplate1.dll"
+            VALUE "CompanyName", "nio"
+            VALUE "FileDescription", "ABakeesmod plugin to display the timline during game"
+            VALUE "FileVersion", "1.0.0.286"
+            VALUE "InternalName", "chronology.dll"
             VALUE "LegalCopyright", "Copyright (C) 2020"
-            VALUE "OriginalFilename", "BakkesPluginTemplate1.dll"
-            VALUE "ProductName", "TODO: <Product name>"
-            VALUE "ProductVersion", stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD)
+            VALUE "OriginalFilename", "chronology.dll"
+            VALUE "ProductName", "Chronology"
+            VALUE "ProductVersion", "1.0.0.286"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x414, 1200
+        VALUE "Translation", 0x40c, 1200
     END
 END
 
-#endif    // Norwegian Bokmål (Norway) resources
+#endif    // Bokmål norvégien (Norvège) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

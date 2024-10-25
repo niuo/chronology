@@ -1,6 +1,11 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by TemplateChanges.rc
+// fichier Include Microsoft Visual C++.
+// Utilisé par chronology.rc
+//
+#define VERSION_MINOR                   0
+#define VERSION_PATCH                   0
+#define VERSION_MAJOR                   1
+#define VERSION_BUILD                   286
 
 // Next default values for new objects
 // 
