@@ -16,7 +16,6 @@ void chronology::onLoad() {
 		chronologyEnabled = cvar.getBoolValue();
 			});
 
-	imgGround = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_texture2.png", true, false);
 	imgGoal = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_goal.png", true, false);
 	imgEpicSave = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_epicsave.png", true, false);
 	imgRound = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_round.png", true, false);
@@ -60,55 +59,43 @@ void chronology::Render(CanvasWrapper canvas) {
 	if (!server.GetbOverTime()) currentTime = server.GetSecondsRemaining();
 	if (server.GetbOverTime()) currentTime = 0;
 	globalTime = server.GetGameTime();
-
-	//game timing
 	int game60sec = 60 * barTotalWidth / globalTime;
 	int game30sec = 30 * barTotalWidth / globalTime;
 
-	
-	//****************
-	//global timeline
-	
-	//background bar
-	canvas.SetColor(LinearColor(255, 255, 255, 255));
+	// background bar
+	canvas.SetColor(LinearColor(255, 255, 255, 100));
 	canvas.DrawRect(Vector2F{ xOffset, yOffset}, Vector2F{ xOffset + barTotalWidth, yOffset + barTotalHeight });
-	// green
-	canvas.SetColor(LinearColor(0, 255, 0, 150));
+	
+	// timezone
+	canvas.SetColor(LinearColor(0, 255, 0, 150)); // green
 	canvas.DrawRect(Vector2F{ xOffset, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth - game60sec, yOffset + barTotalHeight + 3 });
 	canvas.SetPosition(Vector2F{ xOffset - (canvas.GetStringSize("00:00").X / 2) , yOffset + barTotalHeight + 3 });
 	canvas.DrawString(std::format("{}:{:02}", (int)floor(globalTime / 60), (int)(globalTime % 60)));
-	//orange
-	canvas.SetColor(LinearColor(255, 255, 0, 150));
+	canvas.SetColor(LinearColor(0, 150, 0, 50)); 
+	canvas.DrawRect(Vector2F{ xOffset - (canvas.GetStringSize("00:00").X/2) , yOffset + barTotalHeight }, Vector2F{ xOffset + (canvas.GetStringSize("00:00").X/2) , yOffset + barTotalHeight + canvas.GetStringSize("00:00").Y });
+	canvas.SetColor(LinearColor(255, 255, 0, 150)); // orange
 	canvas.DrawRect(Vector2F{ xOffset + barTotalWidth - game60sec, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth - game60sec + game30sec, yOffset + barTotalHeight + 2 });
 	canvas.SetPosition(Vector2F{ xOffset + barTotalWidth - game60sec - (canvas.GetStringSize("01:00").X / 2) , yOffset + barTotalHeight + 3 });
 	canvas.DrawString("01:00");
-	//red
-	canvas.SetColor(LinearColor(255, 0, 0, 150));
+	canvas.SetColor(LinearColor(255, 0, 0, 150)); // red
 	canvas.DrawRect(Vector2F{ xOffset + barTotalWidth - game30sec, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth, yOffset + barTotalHeight + 2 });
 	canvas.SetPosition(Vector2F{ xOffset + barTotalWidth - game30sec - (canvas.GetStringSize("00:30").X/2) , yOffset + barTotalHeight + 3});
 	canvas.DrawString("00:30");
 
-
-	//loading + text
+	//loading + timer
 	float width = barTotalWidth * (globalTime - currentTime) / globalTime;
 	canvas.SetColor(LinearColor(0, 0, 0, 255));
 	canvas.SetPosition(Vector2F{ xOffset + width + 2, yOffset });
 	canvas.DrawString(std::format("{}:{:02}", (int)floor(currentTime / 60), (int)(currentTime % 60)));
 	canvas.SetPosition(Vector2F{ xOffset, yOffset });
-	canvas.SetColor(LinearColor(0, 0, 0, 100));
+	canvas.SetColor(LinearColor(0, 0, 0, 160));
 	canvas.DrawRect(Vector2F{ xOffset, yOffset }, Vector2F{ xOffset + width, yOffset + barTotalHeight + 3 });
-	//canvas.SetPosition(Vector2F{ xOffset, yOffset });
-	//canvas.DrawRect(width, 15, imgGround.get());
-
-	//canvas.SetColor(LinearColor(255, 255, 255, 255));
-	//canvas.DrawLine(Vector2F{ xOffset, yOffset + 15 }, Vector2F{ xOffset + barTotalWidth , yOffset + 15 }, 1);
 	
-
 	//all events
 	int num = 0;
 	for (auto [a, b, c, d] : events) { //time, event, team, player
 		float xPos = barTotalWidth * (globalTime - a) / globalTime;
-		float yPos = num += 40;
+		float yPos = num += 40; //change height dynamically
 		if (num > (40*1)) num = 0;
 		if (d.length() >= 6) {
 			d.resize(5);
@@ -125,28 +112,18 @@ void chronology::Render(CanvasWrapper canvas) {
 		//canvas.SetColor(LinearColor(255, 255, 255, 255));
 		//canvas.SetPosition(Vector2F{ xOffset - 15 + xPos , yOffset + 15 });
 		//canvas.DrawString(std::format("{}:{:02}", (int)floor(a / 60), (int)(a % 60)), 0.8, 0.8);
-		
-		// 
-		
-		/*
-		//icon of the event
-		if (c == 0) canvas.SetColor(LinearColor(100, 100, 255, 255));
-		else canvas.SetColor(LinearColor(255, 165, 0, 255));
-		canvas.DrawLine(Vector2F{ xOffset + xPos, yOffset + 10 }, Vector2F{ xOffset + xPos, yOffset - 1 }, 2);
-		canvas.SetPosition(Vector2F{ xOffset - 14 + xPos , yOffset + yPosIcon });
-		if ((b == "Goal") && (imgGoal->IsLoadedForCanvas())) canvas.DrawTexture(imgGoal.get(), 0.5);
-		if ((b == "EpicSave") && (imgEpicSave->IsLoadedForCanvas())) canvas.DrawTexture(imgEpicSave.get(), 0.5);
-		//name of the player		
-		canvas.SetPosition(Vector2F{ xOffset - (d.length()*2) + xPos , yOffset + yPosName });
-		canvas.DrawString(d, 1, 1, true, false);
-		*/
+		canvas.FillTriangle(
+			Vector2F{ xOffset - 15 + xPos , yOffset + 35 },
+			Vector2F{ xOffset + xPos , yOffset + 35 },
+			Vector2F{ xOffset - 5 + xPos , yOffset + 55 },
+			LinearColor(255, 255, 255, 255));
 
 		//draw round
 		if (c == 0 && b == "Goal") canvas.SetColor(LinearColor(100, 100, 255, 255));
 		else if (c == 1 && b == "Goal") canvas.SetColor(LinearColor(255, 165, 0, 255));
 		else if (c == 0 && b == "EpicSave") canvas.SetColor(LinearColor(20, 20, 255, 255));
 		else if (c == 1 && b == "EpicSave") canvas.SetColor(LinearColor(255, 50, 0, 255));
-		canvas.DrawLine(Vector2F{ xOffset + xPos, yOffset - yPos }, Vector2F{ xOffset + xPos, yOffset + 10 }, 4);
+		canvas.DrawLine(Vector2F{ xOffset + xPos, yOffset - yPos }, Vector2F{ xOffset + xPos, yOffset + barTotalHeight }, 4);
 		canvas.SetPosition(Vector2F{ xOffset + xPos - 20 , yOffset - yPos });
 		canvas.DrawTexture(imgRound.get(), 0.5);
 		canvas.SetPosition(Vector2F{ xOffset + xPos - 16 , yOffset - yPos + 4 });
@@ -188,11 +165,11 @@ void chronology::onStatTickerMessage(void* params) {
 	currentTime = sw.GetSecondsRemaining();
 
 	if (statEvent.GetEventName() == "EpicSave") {
-		if (!receiver) { LOG("Null reciever PRI"); return; }
+		if (!receiver) { LOG("Chronology: Null reciever PRI"); return; }
 		events.push_back(std::tuple<int, std::string, int, std::string>(currentTime, statEvent.GetEventName(), receiver.GetTeam().GetTeamIndex(), receiver.GetPlayerName().ToString()));
 	}
 	if (statEvent.GetEventName() == "Goal") {
-		if (!receiver) { LOG("Null reciever PRI"); return; }
+		if (!receiver) { LOG("Chronology: Null reciever PRI"); return; }
 		events.push_back(std::tuple<int, std::string, int, std::string>(currentTime, statEvent.GetEventName(), receiver.GetTeam().GetTeamIndex(), receiver.GetPlayerName().ToString()));
 	}
 	

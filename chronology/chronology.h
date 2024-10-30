@@ -23,7 +23,6 @@ class chronology : public BakkesMod::Plugin::BakkesModPlugin ,public SettingsWin
 	//void onUnload() override; // Uncomment and implement if you need a unload method
 
 	//images
-	std::shared_ptr<ImageWrapper> imgGround;
 	std::shared_ptr<ImageWrapper> imgGoal;
 	std::shared_ptr<ImageWrapper> imgEpicSave;
 	std::shared_ptr<ImageWrapper> imgRound;
