@@ -23,10 +23,14 @@ class chronology : public BakkesMod::Plugin::BakkesModPlugin ,public SettingsWin
 	//void onUnload() override; // Uncomment and implement if you need a unload method
 
 	//images
-	float imgGroundWidth = 800; //ground image width
 	std::shared_ptr<ImageWrapper> imgGround;
 	std::shared_ptr<ImageWrapper> imgGoal;
 	std::shared_ptr<ImageWrapper> imgEpicSave;
+	std::shared_ptr<ImageWrapper> imgRound;
+
+	//size
+	int barTotalWidth = 800;
+	int barTotalHeight = 15;
 
 	//events
 	int globalTime = 0;

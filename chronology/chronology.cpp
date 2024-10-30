@@ -16,9 +16,10 @@ void chronology::onLoad() {
 		chronologyEnabled = cvar.getBoolValue();
 			});
 
-	imgGround = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_ground.png", true, false);
+	imgGround = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_texture2.png", true, false);
 	imgGoal = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_goal.png", true, false);
 	imgEpicSave = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_epicsave.png", true, false);
+	imgRound = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_round.png", true, false);
 
 	gameWrapper->HookEvent("Function TAGame.GFxData_GameEvent_TA.OnOpenScoreboard", bind(&chronology::scoreboardLoad, this, std::placeholders::_1));
 	gameWrapper->HookEvent("Function TAGame.GFxData_GameEvent_TA.OnCloseScoreboard", bind(&chronology::scoreboardClose, this, std::placeholders::_1));
@@ -30,54 +31,129 @@ void chronology::onLoad() {
 		[this](ServerWrapper caller, void* params, std::string eventname) {
 			onStatTickerMessage(params);
 		});
+		
+	//debug
+	/**/
+	events.push_back(std::tuple<int, std::string, int, std::string>(250, "Goal", 0, "niuognip"));
+	events.push_back(std::tuple<int, std::string, int, std::string>(200, "Goal", 1, "bufalo"));
+	events.push_back(std::tuple<int, std::string, int, std::string>(195, "EpicSave", 0, "tri"));
+	events.push_back(std::tuple<int, std::string, int, std::string>(150, "EpicSave", 1, "cacatoes"));
+	events.push_back(std::tuple<int, std::string, int, std::string>(100, "Goal", 1, "niuognip"));
+	events.push_back(std::tuple<int, std::string, int, std::string>(90, "Goal", 1, "bufalo"));
+	events.push_back(std::tuple<int, std::string, int, std::string>(80, "Goal", 1, "tri"));
+	events.push_back(std::tuple<int, std::string, int, std::string>(60, "EpicSave", 1, "cacatoes"));
+	
 }
+
+//TODO
+// pouvroi choisir longeur de la barwidth et de la barheight
+
 
 
 void chronology::Render(CanvasWrapper canvas) {
 	if (!chronologyEnabled) { return; }
 	ServerWrapper server = gameWrapper->GetCurrentGameState();
 	if (!server) { return; }
-	if (!gameWrapper->IsInGame()) { return; }
+	if (!gameWrapper->IsInGame() && !gameWrapper->IsInOnlineGame()) { return; }
 	
 	// timer
 	if (!server.GetbOverTime()) currentTime = server.GetSecondsRemaining();
+	if (server.GetbOverTime()) currentTime = 0;
 	globalTime = server.GetGameTime();
-		
-	//full timeline
-	if (imgGround->IsLoadedForCanvas()) {
-		canvas.SetColor(LinearColor(100, 120, 123, 255));
-		canvas.SetPosition(Vector2F{ xOffset , yOffset });
-		canvas.DrawRect(imgGroundWidth, 10, imgGround.get());
 
-		float width = imgGroundWidth * (globalTime - currentTime) / globalTime;
-		canvas.SetColor(LinearColor(214, 236, 239, 255));
-		canvas.SetPosition(Vector2F{ xOffset + width, yOffset - 2 });
-		canvas.DrawString(std::format("{}:{:02}", (int)floor(currentTime / 60), (int)(currentTime % 60)));
-		canvas.SetPosition(Vector2F{ xOffset , yOffset });
-		canvas.DrawRect(width, 10, imgGround.get());
-	}
+	//game timing
+	int game60sec = 60 * barTotalWidth / globalTime;
+	int game30sec = 30 * barTotalWidth / globalTime;
+
+	
+	//****************
+	//global timeline
+	
+	//background bar
+	canvas.SetColor(LinearColor(255, 255, 255, 255));
+	canvas.DrawRect(Vector2F{ xOffset, yOffset}, Vector2F{ xOffset + barTotalWidth, yOffset + barTotalHeight });
+	// green
+	canvas.SetColor(LinearColor(0, 255, 0, 150));
+	canvas.DrawRect(Vector2F{ xOffset, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth - game60sec, yOffset + barTotalHeight + 3 });
+	canvas.SetPosition(Vector2F{ xOffset - (canvas.GetStringSize("00:00").X / 2) , yOffset + barTotalHeight + 3 });
+	canvas.DrawString(std::format("{}:{:02}", (int)floor(globalTime / 60), (int)(globalTime % 60)));
+	//orange
+	canvas.SetColor(LinearColor(255, 255, 0, 150));
+	canvas.DrawRect(Vector2F{ xOffset + barTotalWidth - game60sec, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth - game60sec + game30sec, yOffset + barTotalHeight + 2 });
+	canvas.SetPosition(Vector2F{ xOffset + barTotalWidth - game60sec - (canvas.GetStringSize("01:00").X / 2) , yOffset + barTotalHeight + 3 });
+	canvas.DrawString("01:00");
+	//red
+	canvas.SetColor(LinearColor(255, 0, 0, 150));
+	canvas.DrawRect(Vector2F{ xOffset + barTotalWidth - game30sec, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth, yOffset + barTotalHeight + 2 });
+	canvas.SetPosition(Vector2F{ xOffset + barTotalWidth - game30sec - (canvas.GetStringSize("00:30").X/2) , yOffset + barTotalHeight + 3});
+	canvas.DrawString("00:30");
+
+
+	//loading + text
+	float width = barTotalWidth * (globalTime - currentTime) / globalTime;
+	canvas.SetColor(LinearColor(0, 0, 0, 255));
+	canvas.SetPosition(Vector2F{ xOffset + width + 2, yOffset });
+	canvas.DrawString(std::format("{}:{:02}", (int)floor(currentTime / 60), (int)(currentTime % 60)));
+	canvas.SetPosition(Vector2F{ xOffset, yOffset });
+	canvas.SetColor(LinearColor(0, 0, 0, 100));
+	canvas.DrawRect(Vector2F{ xOffset, yOffset }, Vector2F{ xOffset + width, yOffset + barTotalHeight + 3 });
+	//canvas.SetPosition(Vector2F{ xOffset, yOffset });
+	//canvas.DrawRect(width, 15, imgGround.get());
+
+	//canvas.SetColor(LinearColor(255, 255, 255, 255));
+	//canvas.DrawLine(Vector2F{ xOffset, yOffset + 15 }, Vector2F{ xOffset + barTotalWidth , yOffset + 15 }, 1);
+	
 
 	//all events
+	int num = 0;
 	for (auto [a, b, c, d] : events) { //time, event, team, player
-		float xPos = imgGroundWidth * (globalTime - a) / globalTime;
+		float xPos = barTotalWidth * (globalTime - a) / globalTime;
+		float yPos = num += 40;
+		if (num > (40*1)) num = 0;
+		if (d.length() >= 6) {
+			d.resize(5);
+			d = d + ".";
+		}
+
 		//background time
 		if (c == 0) canvas.SetColor(LinearColor(100, 100, 255, 100));
 		else canvas.SetColor(LinearColor(255, 165, 0, 100));
-		canvas.SetPosition(Vector2F{ xOffset - 20 + xPos , yOffset + 15 });
-		canvas.DrawRect(40, 15, imgGround.get());
+		//canvas.SetPosition(Vector2F{ xOffset - 20 + xPos , yOffset + 15 });
+		//canvas.DrawRect(40, 15, imgGround.get());
+		
 		//time of the event
-		canvas.SetColor(LinearColor(200, 200, 200, 255));
-		canvas.SetPosition(Vector2F{ xOffset - 15 + xPos , yOffset + 15 });
-		canvas.DrawString(std::format("{}:{:02}", (int)floor(a / 60), (int)(a % 60)));
+		//canvas.SetColor(LinearColor(255, 255, 255, 255));
+		//canvas.SetPosition(Vector2F{ xOffset - 15 + xPos , yOffset + 15 });
+		//canvas.DrawString(std::format("{}:{:02}", (int)floor(a / 60), (int)(a % 60)), 0.8, 0.8);
+		
+		// 
+		
+		/*
 		//icon of the event
 		if (c == 0) canvas.SetColor(LinearColor(100, 100, 255, 255));
 		else canvas.SetColor(LinearColor(255, 165, 0, 255));
 		canvas.DrawLine(Vector2F{ xOffset + xPos, yOffset + 10 }, Vector2F{ xOffset + xPos, yOffset - 1 }, 2);
-		canvas.SetPosition(Vector2F{ xOffset - 14 + xPos , yOffset - 30 });
+		canvas.SetPosition(Vector2F{ xOffset - 14 + xPos , yOffset + yPosIcon });
 		if ((b == "Goal") && (imgGoal->IsLoadedForCanvas())) canvas.DrawTexture(imgGoal.get(), 0.5);
 		if ((b == "EpicSave") && (imgEpicSave->IsLoadedForCanvas())) canvas.DrawTexture(imgEpicSave.get(), 0.5);
-		//name of the player
-		canvas.SetPosition(Vector2F{ xOffset - (d.length()*2) + xPos , yOffset - 40});
+		//name of the player		
+		canvas.SetPosition(Vector2F{ xOffset - (d.length()*2) + xPos , yOffset + yPosName });
+		canvas.DrawString(d, 1, 1, true, false);
+		*/
+
+		//draw round
+		if (c == 0 && b == "Goal") canvas.SetColor(LinearColor(100, 100, 255, 255));
+		else if (c == 1 && b == "Goal") canvas.SetColor(LinearColor(255, 165, 0, 255));
+		else if (c == 0 && b == "EpicSave") canvas.SetColor(LinearColor(20, 20, 255, 255));
+		else if (c == 1 && b == "EpicSave") canvas.SetColor(LinearColor(255, 50, 0, 255));
+		canvas.DrawLine(Vector2F{ xOffset + xPos, yOffset - yPos }, Vector2F{ xOffset + xPos, yOffset + 10 }, 4);
+		canvas.SetPosition(Vector2F{ xOffset + xPos - 20 , yOffset - yPos });
+		canvas.DrawTexture(imgRound.get(), 0.5);
+		canvas.SetPosition(Vector2F{ xOffset + xPos - 16 , yOffset - yPos + 4 });
+		canvas.SetColor(LinearColor(255, 255, 255, 255));
+		if ((b == "Goal") && (imgGoal->IsLoadedForCanvas())) canvas.DrawTexture(imgGoal.get(), 0.5);
+		if ((b == "EpicSave") && (imgEpicSave->IsLoadedForCanvas())) canvas.DrawTexture(imgEpicSave.get(), 0.5);
+		canvas.SetPosition(Vector2F{ xOffset + xPos + 20 , yOffset - yPos + 15 });
 		canvas.DrawString(d, 1, 1, true, false);
 	}
 
@@ -85,9 +161,9 @@ void chronology::Render(CanvasWrapper canvas) {
 
 void chronology::scoreboardLoad(std::string eventName) {
 	Vector2 screenSize = gameWrapper->GetScreenSize();
-	(imgGroundWidth > screenSize.X) ? screenSize.X : 800;
+	(barTotalWidth > screenSize.X) ? screenSize.X : 800;
 
-	xOffset = (((float)screenSize.X - imgGroundWidth) / 2);
+	xOffset = (((float)screenSize.X - barTotalWidth) / 2);
 	yOffset = (float)screenSize.Y / 5;
 
 	gameWrapper->RegisterDrawable([this](CanvasWrapper canvas) {
