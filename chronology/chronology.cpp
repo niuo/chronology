@@ -87,19 +87,7 @@ void chronology::Render(CanvasWrapper canvas) {
 			d.resize(5);
 			d = d + ".";
 		}
-
-		//background time
-		if (c == 0) canvas.SetColor(LinearColor(100, 100, 255, 100));
-		else canvas.SetColor(LinearColor(255, 165, 0, 100));
-		//canvas.SetPosition(Vector2F{ xOffset - 20 + xPos , yOffset + 15 });
-		//canvas.DrawRect(40, 15, imgGround.get());
 		
-		//time of the event
-		//canvas.SetColor(LinearColor(255, 255, 255, 255));
-		//canvas.SetPosition(Vector2F{ xOffset - 15 + xPos , yOffset + 15 });
-		//canvas.DrawString(std::format("{}:{:02}", (int)floor(a / 60), (int)(a % 60)), 0.8, 0.8);
-		
-
 		//draw round
 		if (c == 0 && b == "Goal") canvas.SetColor(LinearColor(100, 100, 255, 255));
 		else if (c == 1 && b == "Goal") canvas.SetColor(LinearColor(255, 165, 0, 255));
