@@ -15,6 +15,8 @@ void chronology::onLoad() {
 		.addOnValueChanged([this](std::string oldValue, CVarWrapper cvar) {
 		chronologyEnabled = cvar.getBoolValue();
 			});
+	cvarManager->registerCvar("chronology_barwidth", "75", "Width of the bar");
+	cvarManager->registerCvar("chronology_offsetY", "20", "y offset of timeline", true);
 
 	imgGoal = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_goal.png", true, false);
 	imgEpicSave = std::make_shared<ImageWrapper>(gameWrapper->GetDataFolder() / "chronology" / "chronology_epicsave.png", true, false);
@@ -31,21 +33,9 @@ void chronology::onLoad() {
 			onStatTickerMessage(params);
 		});
 		
-	//debug
-	/**/
-	events.push_back(std::tuple<int, std::string, int, std::string>(250, "Goal", 0, "niuognip"));
-	events.push_back(std::tuple<int, std::string, int, std::string>(200, "Goal", 1, "bufalo"));
-	events.push_back(std::tuple<int, std::string, int, std::string>(195, "EpicSave", 0, "tri"));
-	events.push_back(std::tuple<int, std::string, int, std::string>(150, "EpicSave", 1, "cacatoes"));
-	events.push_back(std::tuple<int, std::string, int, std::string>(100, "Goal", 1, "niuognip"));
-	events.push_back(std::tuple<int, std::string, int, std::string>(90, "Goal", 1, "bufalo"));
-	events.push_back(std::tuple<int, std::string, int, std::string>(80, "Goal", 1, "tri"));
-	events.push_back(std::tuple<int, std::string, int, std::string>(60, "EpicSave", 1, "cacatoes"));
-	
 }
 
-//TODO
-// pouvroi choisir longeur de la barwidth et de la barheight
+
 
 
 
@@ -67,12 +57,8 @@ void chronology::Render(CanvasWrapper canvas) {
 	canvas.DrawRect(Vector2F{ xOffset, yOffset}, Vector2F{ xOffset + barTotalWidth, yOffset + barTotalHeight });
 	
 	// timezone
-	canvas.SetColor(LinearColor(0, 255, 0, 150)); // green
+	canvas.SetColor(LinearColor(0, 0, 0, 150)); // black
 	canvas.DrawRect(Vector2F{ xOffset, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth - game60sec, yOffset + barTotalHeight + 3 });
-	canvas.SetPosition(Vector2F{ xOffset - (canvas.GetStringSize("00:00").X / 2) , yOffset + barTotalHeight + 3 });
-	canvas.DrawString(std::format("{}:{:02}", (int)floor(globalTime / 60), (int)(globalTime % 60)));
-	canvas.SetColor(LinearColor(0, 150, 0, 50)); 
-	canvas.DrawRect(Vector2F{ xOffset - (canvas.GetStringSize("00:00").X/2) , yOffset + barTotalHeight }, Vector2F{ xOffset + (canvas.GetStringSize("00:00").X/2) , yOffset + barTotalHeight + canvas.GetStringSize("00:00").Y });
 	canvas.SetColor(LinearColor(255, 255, 0, 150)); // orange
 	canvas.DrawRect(Vector2F{ xOffset + barTotalWidth - game60sec, yOffset + barTotalHeight }, Vector2F{ xOffset + barTotalWidth - game60sec + game30sec, yOffset + barTotalHeight + 2 });
 	canvas.SetPosition(Vector2F{ xOffset + barTotalWidth - game60sec - (canvas.GetStringSize("01:00").X / 2) , yOffset + barTotalHeight + 3 });
@@ -84,8 +70,8 @@ void chronology::Render(CanvasWrapper canvas) {
 
 	//loading + timer
 	float width = barTotalWidth * (globalTime - currentTime) / globalTime;
-	canvas.SetColor(LinearColor(0, 0, 0, 255));
-	canvas.SetPosition(Vector2F{ xOffset + width + 2, yOffset });
+	canvas.SetColor(LinearColor(255, 255, 255, 255));
+	canvas.SetPosition(Vector2F{ xOffset + width + 5, yOffset });
 	canvas.DrawString(std::format("{}:{:02}", (int)floor(currentTime / 60), (int)(currentTime % 60)));
 	canvas.SetPosition(Vector2F{ xOffset, yOffset });
 	canvas.SetColor(LinearColor(0, 0, 0, 160));
@@ -112,11 +98,7 @@ void chronology::Render(CanvasWrapper canvas) {
 		//canvas.SetColor(LinearColor(255, 255, 255, 255));
 		//canvas.SetPosition(Vector2F{ xOffset - 15 + xPos , yOffset + 15 });
 		//canvas.DrawString(std::format("{}:{:02}", (int)floor(a / 60), (int)(a % 60)), 0.8, 0.8);
-		canvas.FillTriangle(
-			Vector2F{ xOffset - 15 + xPos , yOffset + 35 },
-			Vector2F{ xOffset + xPos , yOffset + 35 },
-			Vector2F{ xOffset - 5 + xPos , yOffset + 55 },
-			LinearColor(255, 255, 255, 255));
+		
 
 		//draw round
 		if (c == 0 && b == "Goal") canvas.SetColor(LinearColor(100, 100, 255, 255));
@@ -138,10 +120,13 @@ void chronology::Render(CanvasWrapper canvas) {
 
 void chronology::scoreboardLoad(std::string eventName) {
 	Vector2 screenSize = gameWrapper->GetScreenSize();
-	(barTotalWidth > screenSize.X) ? screenSize.X : 800;
+	CVarWrapper widthCVar = cvarManager->getCvar("chronology_barwidth");
+	CVarWrapper offsetYCVar = cvarManager->getCvar("chronology_offsetY");
 
+	if (!widthCVar || !offsetYCVar) { return; }
+	barTotalWidth = screenSize.X * widthCVar.getIntValue() / 100;
 	xOffset = (((float)screenSize.X - barTotalWidth) / 2);
-	yOffset = (float)screenSize.Y / 5;
+	yOffset = offsetYCVar.getIntValue() / 100.0 * (float)screenSize.Y;
 
 	gameWrapper->RegisterDrawable([this](CanvasWrapper canvas) {
 		Render(canvas);
