@@ -44,6 +44,7 @@ void chronology::Render(CanvasWrapper canvas) {
 	ServerWrapper server = gameWrapper->GetCurrentGameState();
 	if (!server) { return; }
 	if (!gameWrapper->IsInGame() && !gameWrapper->IsInOnlineGame()) { return; }
+	if (gameWrapper->IsInFreeplay()) return;
 	
 	// timer
 	if (!server.GetbOverTime()) currentTime = server.GetSecondsRemaining();

@@ -19,7 +19,7 @@ void chronology::RenderSettings() {
     CVarWrapper widthCvar = cvarManager->getCvar("chronology_barwidth");
     if (!widthCvar) { return; }
     float width = widthCvar.getFloatValue();
-    if (ImGui::SliderFloat("% of screen width used for the timeline (default:75%)", &width, 50.0, 90.0, "%.0f %%")) {
+    if (ImGui::SliderFloat("% of screen width used for the timeline (default:75%)", &width, 10.0, 90.0, "%.0f %%")) {
         widthCvar.setValue(width);
     }
 
